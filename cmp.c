@@ -5,8 +5,8 @@ cmp(bigz * a, bigz * b)
 {
     int i;
 
-	if (a->sign != b->sign)
-		return 0;
+    if (a->sign != b->sign)
+        return 0;
     if (a->size < b->size) {
         for (i = 0; i < a->size; i++)
             if (a->limbs[i] != b->limbs[i])
