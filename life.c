@@ -3,25 +3,24 @@
 
 #include "bigz.h"
 
-
 bigz *
-make_bigz (int size)
+make_bigz(int size)
 {
-	bigz *new;
+    bigz *new;
 
-	assert(size > 0);
-	new = (bigz*) malloc(sizeof(bigz));
-	new->size = size;
-	new->sign = 1;
-	new->limbs = (unsigned int*) calloc(sizeof(unsigned int), size);
-	
-	return new;
+    assert(size > 0);
+    new = (bigz *) malloc(sizeof(bigz));
+    new->size = size;
+    new->sign = POSITIVE;
+    new->limbs = (unsigned int *) calloc(sizeof(unsigned int), size);
+
+    return new;
 }
 
 void
-free_bigz (bigz *n)
+free_bigz(bigz * n)
 {
-	free(n->limbs);
-	n->limbs = NULL;
-	free(n);
+    free(n->limbs);
+    n->limbs = NULL;
+    free(n);
 }

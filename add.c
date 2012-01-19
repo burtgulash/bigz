@@ -2,8 +2,11 @@
 
 #include "bigz.h"
 
-bigz 
-*bigz_uadd(bigz * a, bigz * b)
+/*
+ * Unsigned addition. Returns |a| + |b|.
+ */
+bigz *
+bigz_uadd(bigz * a, bigz * b)
 {
     int carry, i, longer_s, shorter_s;
     unsigned int *longer;
@@ -23,7 +26,7 @@ bigz
 
     for (i = 0; i < shorter_s; i++) {
         sum->limbs[i] = a->limbs[i] + b->limbs[i] + carry;
-        /* TODO asm carry */
+        /* TODO asm add with carry? */
         carry = sum->limbs[i] < a->limbs[i];
     }
     for (; i < longer_s; i++) {
@@ -39,9 +42,12 @@ bigz
         sum->limbs[longer_s] = carry;
     }
 
-    return sum;
+    return (sum);
 }
 
+/*
+ * Unsigned subtraction. Returns |a| - |b|.
+ */
 bigz *
 bigz_usub(bigz * a, bigz * b)
 {
@@ -74,13 +80,52 @@ bigz_usub(bigz * a, bigz * b)
             diff->limbs[i] = -(b->limbs[i] + borrow);
     }
 
+    /* Flip sign and complement digits if a < b. */
     if (borrow) {
-        diff->sign = 0;
+        diff->sign = NEGATIVE;
         diff->limbs[0] = -diff->limbs[0];
         for (i = 1; i < longer_s; i++)
             diff->limbs[i] = -(diff->limbs[i] + 1);
     }
 
     /* TODO truncate leading zeros */
+    return (diff);
+}
+
+
+/*
+ * Signed addition. Returns a + b.
+ */
+bigz *
+bigz_add(bigz * a, bigz * b)
+{
+    bigz *sum;
+
+    if (a->sign == b->sign) {
+        sum = bigz_uadd(a, b);
+        sum->sign = a->sign;
+    } else {
+        sum = bigz_usub(a, b);
+        if (a->sign == NEGATIVE)
+            sum->sign = !sum->sign;
+    }
+
+    return (sum);
+}
+
+
+/*
+ * Signed subtraction. Returns a - b.
+ */
+bigz *
+bigz_sub(bigz * a, bigz * b)
+{
+    bigz *diff;
+
+    /* FIXME Side effect on b->sign. */
+    b->sign = !b->sign;
+    diff = bigz_add(a, b);
+    b->sign = !b->sign;
+
     return diff;
 }

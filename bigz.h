@@ -1,6 +1,8 @@
 #ifndef BIGZ_H
 #define BIGZ_H
 
+enum {NEGATIVE = 0, POSITIVE = 1}
+
 typedef struct {
 	int size, sign;
 	unsigned int *limbs;
