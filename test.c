@@ -7,12 +7,12 @@ bigz_print(bigz * n)
 {
     int i;
 
-    if (n->sign == 0)
+    if (n->sign == NEGATIVE)
         printf("-");
     else
         printf("+");
     for (i = 0; i < n->size; i++)
-        printf("%10u ", n->limbs[i]);
+        printf("%11u ", n->limbs[i]);
     printf("\n");
 }
 
@@ -22,14 +22,14 @@ main()
     int i;
     bigz *a, *b, *c;
 
-    a = make_bigz(4);
-    b = make_bigz(3);
+    a = make_bigz(1);
+    b = make_bigz(1);
 
-    a->limbs[0] = 6;
+    a->limbs[0] = 6234245;
 
-    b->limbs[0] = 57;
+    b->limbs[0] = 501233;
 
-    c = bigz_usub(a, b);
+    c = bigz_umul(a, b);
 
     bigz_print(a);
     bigz_print(b);

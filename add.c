@@ -27,7 +27,10 @@ bigz_uadd(bigz * a, bigz * b)
     for (i = 0; i < shorter_s; i++) {
         sum->limbs[i] = a->limbs[i] + b->limbs[i] + carry;
         /* TODO asm add with carry? */
-        carry = sum->limbs[i] < a->limbs[i];
+		if (carry)
+			carry = sum->limbs[i] <= a->limbs[i];
+		else	
+			carry = sum->limbs[i] < a->limbs[i];
     }
     for (; i < longer_s; i++) {
         sum->limbs[i] = longer[i] + carry;
@@ -63,22 +66,24 @@ bigz_usub(bigz * a, bigz * b)
     borrow = 0;
     diff = make_bigz(longer_s);
 
+	/* FIXME borrow bug? */
     for (i = 0; i < shorter_s; i++) {
         diff->limbs[i] = a->limbs[i] - (b->limbs[i] + borrow);
-        borrow = borrow + b->limbs[i] > a->limbs[i];
+		if (borrow)
+			borrow = b->limbs[i] >= a->limbs[i];
+		else
+			borrow = b->limbs[i] > a->limbs[i];
     }
-    if (a->size > b->size) {
-        diff->limbs[i] = a->limbs[i] - borrow;
-        i++;
-        for (; i < longer_s; i++)
-            diff->limbs[i] = a->limbs[i];
-    } else {
-        diff->limbs[i] = -(b->limbs[i] + borrow);
-        i++;
-        borrow = 1;
-        for (; i < longer_s; i++)
+    if (a->size > b->size)
+		for (; i < longer_s; i++) {
+			diff->limbs[i] = a->limbs[i] - borrow;
+			borrow = borrow > a->limbs[i];
+		}
+    else
+        for (; i < longer_s; i++) {
             diff->limbs[i] = -(b->limbs[i] + borrow);
-    }
+			borrow = borrow + b->limbs[i] > 0;
+		}
 
     /* Flip sign and complement digits if a < b. */
     if (borrow) {
@@ -127,5 +132,5 @@ bigz_sub(bigz * a, bigz * b)
     diff = bigz_add(a, b);
     b->sign = !b->sign;
 
-    return diff;
+    return (diff);
 }
