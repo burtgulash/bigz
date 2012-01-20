@@ -17,6 +17,7 @@ bigz *bigz_umul(bigz * a, bigz * b);
 
 bigz *bigz_add(bigz * a, bigz * b);
 bigz *bigz_sub(bigz * a, bigz * b);
+bigz *bigz_mul(bigz * a, bigz * b);
 
 int cmp(bigz * a, bigz * b);
 

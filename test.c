@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "bigz.h"
 
@@ -22,23 +23,15 @@ main()
     int i;
     bigz *a, *b, *c;
 
-    a = make_bigz(3);
-    b = make_bigz(3);
+    a = make_bigz(1);
+    b = make_bigz(1);
 
-    // a->limbs[0] = 6234245;
-    // a->limbs[1] = 123405;
-	a->limbs[0] = 1231241;
-	a->limbs[1] = 1231241;
-	a->limbs[2] = 121241;
+    for (i = 0; i < a->size; i++)
+        a->limbs[i] = rand() * rand();
+    for (i = 0; i < b->size; i++)
+        b->limbs[i] = rand() * rand();
 
-	b->limbs[0] = 124101212;
-	b->limbs[1] = 230124192;
-	b->limbs[2] = 119241283;
-
-    // b->limbs[0] = 501233;
-    // b->limbs[1] = 23469899;
-
-    c = bigz_umul(a, b);
+    c = bigz_mul(a, b);
 
     bigz_print(a);
     bigz_print(b);

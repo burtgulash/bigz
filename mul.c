@@ -1,6 +1,9 @@
 #include "bigz.h"
 
 
+/*
+ * Unsigned multiplication. Returns |a * b|
+ */
 bigz *
 bigz_umul(bigz * a, bigz * b)
 {
@@ -28,15 +31,14 @@ bigz_umul(bigz * a, bigz * b)
 #define HALF_INT (((unsigned int) ~0) >> HALF)
 #define hi(x) ((x) >> HALF)
 #define lo(x) (HALF_INT & (x))
-unsigned long long xx = ((unsigned long long) b->limbs[i] * a->limbs[j] >> 32) + add_carry;
-			cross1 = hi(b->limbs[i]) * lo(a->limbs[j]);
-			cross2 = lo(b->limbs[i]) * hi(a->limbs[j]);
-            add_carry += lo(cross1) + lo(cross2) + hi(lo(b->limbs[i]) * lo(a->limbs[j])) >= HALF_INT;
-            mul_carry = hi(b->limbs[i]) * hi(a->limbs[j]) +
-                hi(cross1) + hi(cross2) + add_carry;
-printf("long: %u\n", (unsigned int) xx);
-printf("norm: %u\n", mul_carry);
-			
+            cross1 = hi(b->limbs[i]) * lo(a->limbs[j]);
+            cross2 = lo(b->limbs[i]) * hi(a->limbs[j]);
+            add_carry +=
+                lo(cross1) + lo(cross2) +
+                hi(lo(b->limbs[i]) * lo(a->limbs[j])) >> HALF;
+            mul_carry =
+                hi(b->limbs[i]) * hi(a->limbs[j]) + hi(cross1) +
+                hi(cross2) + add_carry;
 #undef hi
 #undef lo
 #undef HALF_INT
@@ -59,4 +61,20 @@ printf("norm: %u\n", mul_carry);
     }
 
     return (prod);
+}
+
+
+/*
+ * Signed multiplication. Returns a * b.
+ */
+bigz *
+bigz_mul(bigz * a, bigz * b)
+{
+    bigz *prod;
+
+    prod = bigz_umul(a, b);
+    if (a->sign != b->sign)
+        prod->sign = NEGATIVE;
+
+    return prod;
 }
