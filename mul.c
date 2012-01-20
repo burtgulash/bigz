@@ -6,7 +6,7 @@ bigz_umul(bigz * a, bigz * b)
 {
     int i, j;
     unsigned int main_add_carry, add_carry, mul_carry;
-    unsigned int cross_prod;
+    unsigned int cross1, cross2;
     unsigned int tmp;
     bigz *prod;
 
@@ -28,11 +28,15 @@ bigz_umul(bigz * a, bigz * b)
 #define HALF_INT (((unsigned int) ~0) >> HALF)
 #define hi(x) ((x) >> HALF)
 #define lo(x) (HALF_INT & (x))
-            cross_prod = hi(hi(b->limbs[i]) * lo(a->limbs[j])) +
-                hi(lo(b->limbs[i]) * hi(a->limbs[j]));
-            add_carry += cross_prod >= HALF_INT;
+unsigned long long xx = ((unsigned long long) b->limbs[i] * a->limbs[j] >> 32) + add_carry;
+			cross1 = hi(b->limbs[i]) * lo(a->limbs[j]);
+			cross2 = lo(b->limbs[i]) * hi(a->limbs[j]);
+            add_carry += lo(cross1) + lo(cross2) + hi(lo(b->limbs[i]) * lo(a->limbs[j])) >= HALF_INT;
             mul_carry = hi(b->limbs[i]) * hi(a->limbs[j]) +
-                cross_prod + add_carry;
+                hi(cross1) + hi(cross2) + add_carry;
+printf("long: %u\n", (unsigned int) xx);
+printf("norm: %u\n", mul_carry);
+			
 #undef hi
 #undef lo
 #undef HALF_INT
