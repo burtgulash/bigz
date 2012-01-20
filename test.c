@@ -23,8 +23,8 @@ main()
     int i;
     bigz *a, *b, *c;
 
-    a = make_bigz(1);
-    b = make_bigz(1);
+    a = make_bigz(3);
+    b = make_bigz(3);
 
     for (i = 0; i < a->size; i++)
         a->limbs[i] = rand() * rand();
@@ -33,8 +33,8 @@ main()
 
     c = bigz_mul(a, b);
 
-    bigz_print(a);
-    bigz_print(b);
+    // bigz_print(a);
+    // bigz_print(b);
     bigz_print(c);
 
     return 0;

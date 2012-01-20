@@ -8,9 +8,8 @@ bigz *
 bigz_umul(bigz * a, bigz * b)
 {
     int i, j;
-    unsigned int main_add_carry, add_carry, mul_carry;
-    unsigned int cross1, cross2;
-    unsigned int tmp;
+    unsigned int sum_carry, carry, mul_carry;
+    unsigned int tmp, c0, c1, c2, c3;   /* storage for partial products */
     bigz *prod;
 
     if (a->size < b->size) {
@@ -21,37 +20,39 @@ bigz_umul(bigz * a, bigz * b)
     prod = make_bigz(a->size + b->size);
 
     for (i = 0; i < b->size; i++) {
-        main_add_carry = mul_carry = 0;
-
-        for (j = 0; j < a->size; j++) {
-            tmp = (b->limbs[i] * a->limbs[j]) + mul_carry;
-            add_carry = tmp < mul_carry;
+        sum_carry = mul_carry = 0;
 
 #define HALF (sizeof(unsigned int) * 8 / 2)
 #define HALF_INT (((unsigned int) ~0) >> HALF)
+#define tohi(x) ((x) << HALF)
 #define hi(x) ((x) >> HALF)
 #define lo(x) (HALF_INT & (x))
-            cross1 = hi(b->limbs[i]) * lo(a->limbs[j]);
-            cross2 = lo(b->limbs[i]) * hi(a->limbs[j]);
-            add_carry +=
-                lo(cross1) + lo(cross2) +
-                hi(lo(b->limbs[i]) * lo(a->limbs[j])) >> HALF;
-            mul_carry =
-                hi(b->limbs[i]) * hi(a->limbs[j]) + hi(cross1) +
-                hi(cross2) + add_carry;
+
+        for (j = 0; j < a->size; j++) {
+            c0 = lo(b->limbs[i]) * lo(a->limbs[j]);
+            c1 = hi(b->limbs[i]) * lo(a->limbs[j]);
+            c2 = lo(b->limbs[i]) * hi(a->limbs[j]);
+            c3 = hi(b->limbs[i]) * hi(a->limbs[j]);
+
+            tmp = c0 + tohi(c1) + tohi(c2) + mul_carry;
+            carry = tmp < mul_carry;
+
+            carry += lo(c1) + lo(c2) + hi(c0) >> HALF;
+            mul_carry = c3 + hi(c1) + hi(c2) + carry;
+
+            prod->limbs[i + j] += tmp + sum_carry;
+            if (sum_carry)
+                sum_carry = prod->limbs[i + j] <= tmp;
+            else
+                sum_carry = prod->limbs[i + j] < tmp;
+        }
+
 #undef hi
 #undef lo
 #undef HALF_INT
 #undef HALF
 
-            prod->limbs[i + j] += tmp + main_add_carry;
-            if (main_add_carry)
-                main_add_carry = prod->limbs[i + j] <= tmp;
-            else
-                main_add_carry = prod->limbs[i + j] < tmp;
-        }
-
-        prod->limbs[i + j] += mul_carry + main_add_carry;
+        prod->limbs[i + j] += mul_carry + sum_carry;
 
         /* 
          * Last digit is always added to zero. Last digit is always less
